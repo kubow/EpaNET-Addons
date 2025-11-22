@@ -1,0 +1,4 @@
+# Flet GUI requirements
+-r base.in
+flet>=0.21.0
+

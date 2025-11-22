@@ -1,0 +1,4 @@
+# CustomTkinter GUI requirements
+-r base.in
+customtkinter>=5.2.0
+

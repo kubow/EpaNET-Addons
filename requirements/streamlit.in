@@ -1,0 +1,4 @@
+# Streamlit GUI requirements
+-r base.in
+streamlit>=1.28.0
+

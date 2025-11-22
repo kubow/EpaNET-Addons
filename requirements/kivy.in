@@ -1,0 +1,4 @@
+# Kivy GUI requirements
+-r base.in
+kivy>=2.1.0
+

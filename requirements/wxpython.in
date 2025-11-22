@@ -1,0 +1,4 @@
+# wxPython GUI requirements
+-r base.in
+wxPython>=4.2.0
+

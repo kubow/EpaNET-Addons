@@ -1,0 +1,4 @@
+# PyQt/PySide GUI requirements
+-r base.in
+PyQt6>=6.6.0
+

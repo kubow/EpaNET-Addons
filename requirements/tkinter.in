@@ -1,0 +1,4 @@
+# Tkinter GUI requirements
+-r base.in
+tk>=0.1.0
+
