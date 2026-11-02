@@ -72,6 +72,33 @@ All GUIs require the base dependencies:
 
 ### Running the GUIs
 
+With Make installed, run any variant from the repository root with one command:
+
+```bash
+make tkinter
+make customtkinter
+make pyqt
+make wxpython
+make kivy
+make streamlit
+make flask
+make flet
+```
+
+The first launch creates `venv` automatically and installs the chosen variant's
+dependencies. Later launches reuse that setup; changes to the requirements trigger
+installation again. For example, `make flask` sets up Flask and starts the app at
+`http://127.0.0.1:5000`. Initial setup requires internet access to download packages.
+You can also create just the environment with `make env`, or explicitly install
+dependencies with `make install-flask`. Every variant has an `install-<variant>` target.
+
+The Makefile uses `venv/bin/python` by default. Select a different environment
+directory with `VENV=.venv`, choose its base Python with `BASE_PYTHON=python3.13`,
+or use an existing interpreter with `PYTHON=/path/to/python`. Pass launcher arguments
+with `ARGS`, for example `make streamlit ARGS="--server.port 8502"`.
+Run `make help` (or just `make`) to list the available commands. These targets
+launch the existing implementations; some variants still have limited functionality.
+
 Each GUI can be run as a Python module:
 
 ```bash
@@ -80,8 +107,6 @@ python -m EpaNETTk
 
 # Streamlit GUI
 streamlit run EpaNETStreamlit/__main__.py
-# or
-python -m EpaNETStreamlit
 ```
 
 ### Using the Core Wrapper (`epanet_wrapper.py`)
