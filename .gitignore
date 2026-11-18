@@ -172,3 +172,5 @@ cython_debug/
 
 *.inp
 *.txt
+projects/
+.tools/
