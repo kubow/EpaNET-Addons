@@ -11,6 +11,7 @@ The visualization system uses NetworkX for proper graph representation, accounti
 """
 
 from pathlib import Path
+import os
 import shutil
 import tempfile
 from collections.abc import Mapping
@@ -189,9 +190,16 @@ class EpanetWrapper:
                     pass
             staged_msx = self._run_dir / msx_path.name
             shutil.copy2(msx_path, staged_msx)
-            self.network.loadMSXFile(str(staged_msx))
-            names = species or list(self.network.getMSXSpeciesNameID())
-            computed = self.network.getMSXComputedQualitySpecie(names)
+            # The MSX library writes scratch files to the working directory;
+            # keep them inside the run directory instead of the caller's CWD.
+            previous_cwd = os.getcwd()
+            os.chdir(self._run_dir)
+            try:
+                self.network.loadMSXFile(str(staged_msx))
+                names = species or list(self.network.getMSXSpeciesNameID())
+                computed = self.network.getMSXComputedQualitySpecie(names)
+            finally:
+                os.chdir(previous_cwd)
             self._msx_results = {
                 "time": list(computed.Time),
                 "species": names,

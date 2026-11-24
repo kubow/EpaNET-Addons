@@ -115,10 +115,14 @@ def mdb_to_inp(source: Path, destination: Path) -> dict:
     for node_id in virtual_nodes:
         # Elevation cannot be recovered safely from link geometry alone.
         lines.append(f"{node_id} 0.000000 ; reconstructed MIKE insert segment")
+    # Only patterns that actually have multipliers can be referenced; others become constant (1.0).
+    valued_patterns = {r["PatternID"] for r in tables["mw_DPPatternD"] if r.get("PatternID")}
     lines += ["", "[RESERVOIRS]"]
     for r in tables["mw_Tank"]:
         if r.get("MUID") in calculation_nodes and r.get("Enabled", 1) and int(_number(r.get("HGLTypeNo"), 1)) == 0:
             head_pattern = f" {r['PatternID']}" if r.get("PatternID") else ""
+            if r.get("PatternID") and r["PatternID"] not in valued_patterns:
+                report["constant_patterns"].append(r["PatternID"])
             lines.append(f"{r['MUID']} {_number(r.get('HGL', r.get('Elev'))):.6f}{head_pattern}")
     lines += ["", "[TANKS]"]
     for r in tables["mw_Tank"]:
@@ -166,7 +170,7 @@ def mdb_to_inp(source: Path, destination: Path) -> dict:
         speed = _number(r.get("P_Speed"), 1)
         lines.append(f"{pump_id} {a} {b} HEAD {curve} SPEED {speed:.6g}")
         pump_curves.append((curve, flow, head))
-    patterns = {r.get("MUID") for r in tables["mw_DPPattern"]}
+    patterns = {r.get("MUID") for r in tables["mw_DPPattern"]} & valued_patterns
     lines += ["", "[DEMANDS]"]
     for r in tables["mw_MDemand"]:
         node, pattern = r.get("JunctionID"), r.get("PatternID")
@@ -175,7 +179,12 @@ def mdb_to_inp(source: Path, destination: Path) -> dict:
             report["constant_patterns"].append(pattern)
         lines.append(f"{node} {_number(r.get('Demand')):.6f}" + (f" {pattern}" if pattern else ""))
     lines += ["", "[PATTERNS]"]
-    for r in sorted(tables["mw_DPPatternD"], key=lambda x: (x.get("PatternID", ""), _number(x.get("Sqn")))):
+    # Orphan pattern values (no PatternID) occur in older MIKE URBAN archives; skip and report them.
+    orphan_values = [r for r in tables["mw_DPPatternD"] if not r.get("PatternID")]
+    if orphan_values:
+        report["orphan_pattern_values"] = len(orphan_values)
+    for r in sorted((r for r in tables["mw_DPPatternD"] if r.get("PatternID")),
+                    key=lambda x: (str(x["PatternID"]), _number(x.get("Sqn")))):
         lines.append(f"{r['PatternID']} {_number(r.get('DPValue')):.9g}")
     for pattern in sorted(set(report["constant_patterns"])):
         lines.append(f"{pattern} 1")

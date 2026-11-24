@@ -7,4 +7,5 @@ pandas>=2.2.3
 pillow>=11.1.0
 # Reads MIKE URBAN / ESRI Personal Geodatabase (.mdb) files without Access.
 access-parser>=0.0.6
-
+# Coordinate reference systems for basemaps (S-JTSK/Krovak, UTM, ...).
+pyproj>=3.7

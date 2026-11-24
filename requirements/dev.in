@@ -1,4 +1,4 @@
 # Development tools
 -r base.in
 pip-tools>=7.4.1
-
+pytest>=8
