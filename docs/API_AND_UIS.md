@@ -8,8 +8,12 @@ interfaces. Keep application-specific UI state outside it.
 ```text
 epanet_addons/
 ├── engine.py          EPANET and MSX wrapper
-├── geo.py             CRS identification
-├── projects.py        local project persistence
+├── network.py         topology, editable properties, results, scenarios, KPIs
+├── msx.py             structured MSX model: parse, validate, write, templates
+├── crs.py             project CRS, detection, transforms to Web Mercator
+├── gpkg.py            GeoPackage point/line reader (no GDAL)
+├── geo.py             CRS identification rules
+├── projects.py        local project persistence (incl. scenario results)
 └── mike_urban/
     ├── importer.py    MDB → GeoPackage
     ├── inp.py         MDB → standard EPANET INP
@@ -61,6 +65,13 @@ the resulting EPANET model.
 | `save_input_file(path)` | Save the current in-memory EPANET model |
 | `close()` | Release the engine and temporary files |
 
+For interfaces, `epanet_addons.network` turns the engine state into plain
+arrays. It provides `read_topology()`, the `NODE_FIELDS`/`LINK_FIELDS`
+property catalogue with `set_property()`/`bulk_edit()`,
+`Results.from_engine()` (hydraulics, quality and MSX as `(time, object)`
+arrays), and `compare()`/`kpis()` for scenarios. `epanet_addons.msx` edits
+`.msx` files as data, and `epanet_addons.crs` handles map projection.
+
 The wrapper also provides Matplotlib-oriented topology, attribute, and time
 series plotting helpers. Use them for lightweight interfaces; larger UIs may
 render data through their own map/chart components.
@@ -69,8 +80,8 @@ render data through their own map/chart components.
 
 | Interface | Status | Intended use |
 |---|---|---|
-| `EpaNETStreamlit` | Active | Recommended local workbench for INP, MDB, GeoPackage, parameters, hydraulic/MSX runs, and saved projects |
-| `EpaNETTk` | Active | Desktop-oriented EPANET viewer and analysis interface |
+| `EpaNETTk` | Active (primary) | Desktop workbench: CRS map with basemaps, analytics layers, scenarios and comparison, data browser, MSX studio, editing ([guide](DESKTOP_WORKBENCH.md)) |
+| `EpaNETStreamlit` | Prototype | Browser workbench for INP, MDB, GeoPackage, parameters, hydraulic/MSX runs |
 | `EpaNETCustomTkinter`, `EpaNETPyQt`, `EpaNETwxPython`, `EpaNETKivy`, `EpaNETFlask`, `EpaNETFlet` | Scaffold | Starting points, not feature-equivalent applications |
 
 Launch an available UI with `make streamlit` or `make tkinter`. The Makefile
